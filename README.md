@@ -4,6 +4,12 @@ Projeto de Computação Gráfica utilizando **Realidade Aumentada (AR)** e **Vis
 
 O sistema utiliza QR Codes como marcadores fiduciais para detectar elementos físicos através da câmera e projetar objetos gráficos virtuais diretamente sobre o ambiente real em tempo real.
 
+## Vídeo Demonstrativo
+
+[![Demonstração do projeto Jogo da Velha AR](https://img.youtube.com/vi/0WJbqrRqtr0/hqdefault.jpg)](https://youtu.be/0WJbqrRqtr0)
+
+Clique na imagem para assistir à demonstração do projeto no YouTube.
+
 ## Demonstração
 
 O projeto reconhece três tipos de marcadores:
