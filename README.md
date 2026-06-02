@@ -10,31 +10,46 @@ O projeto reconhece três tipos de marcadores:
 
 | QR Code | Função |
 |---|---|
-| TABULEIRO | Gera o tabuleiro AR |
-| X | Projeta um X virtual animado |
-| O | Projeta um círculo virtual animado |
+| TABULEIRO | Calibra a área virtual do tabuleiro |
+| X | Registra uma jogada do jogador X |
+| O | Registra uma jogada do jogador O |
 
-Os elementos acompanham:
+Depois que uma jogada é confirmada, ela fica salva no estado interno do jogo. Assim, o QR Code físico não precisa continuar visível para que a peça permaneça na tela.
 
-- posição;
-- escala;
-- inclinação;
-- rotação do marcador.
+## Lógica Atual
 
-Além disso, o overlay cobre o QR Code detectado com uma área branca antes de desenhar o elemento virtual, melhorando a leitura visual da cena.
+O projeto deixou de depender de todos os QR Codes visíveis ao mesmo tempo. O fluxo atual é:
+
+1. O usuário aponta o QR Code `TABULEIRO` para calibrar a área do jogo.
+2. O sistema salva a posição virtual do tabuleiro.
+3. O jogador posiciona um QR Code `X` ou `O` dentro de uma célula.
+4. Se o marcador ficar estável por 3 segundos, a jogada é confirmada.
+5. A posição confirmada é salva em uma matriz 3x3.
+6. A peça passa a ser renderizada pelo programa, mesmo que o QR Code físico saia da câmera.
+7. O sistema alterna o turno entre `X` e `O`.
+8. A vitória ou empate é verificado automaticamente.
+
+Essa lógica reduz o problema de piscada/falha de detecção, porque o sensor não precisa rastrear todos os marcadores da partida ao mesmo tempo.
+
+## Controles
+
+- `ESC`: fecha o programa.
+- `R`: reinicia o tabuleiro e limpa as jogadas salvas.
+- `F`: alterna entre janela normal e tela cheia.
 
 ## Conceitos Aplicados
 
 - Realidade Aumentada (AR)
 - Visão Computacional
 - Rastreamento de Marcadores
+- Estado persistente do jogo
 - Detecção de múltiplos marcadores
 - Processamento de Imagem
 - Renderização 2D
 - Animação procedural
 - Transformações Geométricas
 - Interpolação Espacial
-- Pipeline Gráfico
+- Matriz 3x3 para lógica do jogo
 - Captura de vídeo com multithread
 
 ## Tecnologias Utilizadas
@@ -106,71 +121,49 @@ python gerar_qrcodes.py
 python jogo_da_velha_ar.py
 ```
 
-## Webcam do Celular
+## Funcionamento Técnico
 
-O projeto suporta webcam virtual via celular utilizando aplicativos como:
+O programa utiliza uma classe `CameraThread` para capturar frames em segundo plano. A thread principal usa o frame mais recente para executar:
 
-- DroidCam
-- Iriun Webcam
-- Camo
+- detecção de QR Codes com `QRCodeDetector.detectAndDecodeMulti`;
+- calibração da área virtual do tabuleiro;
+- conversão da posição do QR Code para linha/coluna da matriz 3x3;
+- confirmação da jogada após 3 segundos de estabilidade;
+- renderização do tabuleiro e das peças salvas;
+- verificação de vitória ou empate.
 
-Ao iniciar o programa, será exibida uma lista de câmeras disponíveis para seleção.
-
-## Funcionamento
-
-1. O sistema abre a câmera em uma thread separada.
-2. A thread principal processa o frame mais recente.
-3. QR Codes são detectados usando `QRCodeDetector.detectAndDecodeMulti`.
-4. O sistema consegue tratar múltiplos marcadores no mesmo frame.
-5. O marcador detectado é coberto por uma base branca.
-6. Elementos gráficos animados são renderizados sobre o QR Code.
-7. O tabuleiro é expandido dinamicamente baseado na posição do marcador.
+A janela de vídeo é criada em modo redimensionável. Ao maximizar a janela ou pressionar `F`, a imagem da câmera passa a ocupar todo o espaço disponível da tela, em vez de ficar presa ao tamanho original da webcam.
 
 ## Tabuleiro AR
 
-O QR Code `TABULEIRO` funciona como marcador principal da área do jogo.
+O QR Code `TABULEIRO` funciona como referência para calcular a área virtual do jogo.
 
-A partir dele:
+A partir dele, o sistema:
 
-- o sistema calcula proporções;
-- expande a área virtual;
-- aplica um fundo branco semitransparente;
-- desenha o grid do jogo da velha;
-- anima uma linha de varredura para dar sensação de atualização.
+- calcula o centro do marcador;
+- expande uma área quadrada ao redor dele;
+- aplica um fundo branco sólido;
+- desenha a grade 3x3;
+- mantém a última posição calibrada mesmo que o QR Code não esteja sendo detectado em todos os frames.
 
-## Marcador X
+## Marcadores X e O
 
-O QR Code `X` renderiza:
+Os QR Codes `X` e `O` não são mais tratados como peças permanentes. Eles funcionam como entrada de jogada.
 
-- uma base branca sobre o marcador;
-- um X vermelho animado;
-- linhas que crescem em ciclo contínuo;
-- espessura pulsante.
+Quando uma peça é confirmada:
 
-## Marcador O
-
-O QR Code `O` renderiza:
-
-- uma base branca sobre o marcador;
-- um círculo azul animado;
-- raio pulsante;
-- arco rotativo para simular movimento.
-
-## Multithread e Multimarcadores
-
-O projeto utiliza uma classe `CameraThread` para separar a captura da câmera do processamento principal. A câmera fica lendo frames em segundo plano, enquanto a thread principal executa detecção, cálculo geométrico e renderização.
-
-A detecção de múltiplos marcadores continua sendo feita pelo `detectAndDecodeMulti`, permitindo reconhecer `TABULEIRO`, `X` e `O` simultaneamente no mesmo frame.
+- a célula é salva na matriz;
+- o QR Code físico pode sair da câmera;
+- o programa continua renderizando a peça naquela posição;
+- o turno passa para o outro jogador.
 
 ## Próximas Etapas
 
-- Sistema lógico completo do jogo da velha
-- Associação de peças X/O às células do tabuleiro
-- Detecção automática de vitória
-- Melhorias de estabilidade no tracking
-- HUD interativa
-- Refinamento das animações
-- Renderização 3D real
+- Refinar a estabilidade da calibração do tabuleiro.
+- Permitir calibração por uma grade desenhada fisicamente, sem QR Code `TABULEIRO`.
+- Adicionar placar e botão visual de reinício.
+- Melhorar a aparência das animações.
+- Exportar vídeo demonstrativo do funcionamento.
 
 ## Relação com a Disciplina
 
