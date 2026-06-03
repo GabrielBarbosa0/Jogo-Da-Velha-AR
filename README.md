@@ -2,7 +2,7 @@
 
 Projeto de Computação Gráfica utilizando **Realidade Aumentada (AR)** e **Visão Computacional** desenvolvido em Python com OpenCV.
 
-O sistema utiliza QR Codes como marcadores fiduciais para detectar elementos físicos através da câmera e projetar objetos gráficos virtuais diretamente sobre o ambiente real em tempo real.
+O sistema utiliza QR Codes como marcadores fiduciais para detectar elementos físicos pela câmera e projetar objetos gráficos virtuais diretamente sobre o ambiente real em tempo real.
 
 ## Vídeo Demonstrativo
 
@@ -10,7 +10,7 @@ O sistema utiliza QR Codes como marcadores fiduciais para detectar elementos fí
 
 Clique na imagem para assistir à demonstração do projeto no YouTube.
 
-## Demonstração
+## Como Funciona
 
 O projeto reconhece três tipos de marcadores:
 
@@ -29,7 +29,7 @@ O projeto deixou de depender de todos os QR Codes visíveis ao mesmo tempo. O fl
 1. O usuário aponta o QR Code `TABULEIRO` para calibrar a área do jogo.
 2. O sistema salva a posição virtual do tabuleiro.
 3. O jogador posiciona um QR Code `X` ou `O` dentro de uma célula.
-4. Se o marcador ficar estável por 3 segundos, a jogada é confirmada.
+4. Se o marcador ficar estável por 2 segundos, a jogada é confirmada.
 5. A posição confirmada é salva em uma matriz 3x3.
 6. A peça passa a ser renderizada pelo programa, mesmo que o QR Code físico saia da câmera.
 7. O sistema alterna o turno entre `X` e `O`.
@@ -47,14 +47,14 @@ Essa lógica reduz o problema de piscada/falha de detecção, porque o sensor n�
 
 - Realidade Aumentada (AR)
 - Visão Computacional
-- Rastreamento de Marcadores
+- Rastreamento de marcadores
 - Estado persistente do jogo
 - Detecção de múltiplos marcadores
-- Processamento de Imagem
+- Processamento de imagem
 - Renderização 2D
 - Animação procedural
-- Transformações Geométricas
-- Interpolação Espacial
+- Transformações geométricas
+- Interpolação espacial
 - Matriz 3x3 para lógica do jogo
 - Captura de vídeo com multithread
 
@@ -71,28 +71,35 @@ Essa lógica reduz o problema de piscada/falha de detecção, porque o sensor n�
 
 ```text
 .
-├── jogo_da_velha_ar.py
+├── AGENTS.md
+├── docs/
+│   └── TDD.md
 ├── gerar_qrcodes.py
+├── jogo_da_velha_ar.py
 ├── qr_TABULEIRO.png
 ├── qr_X.png
 ├── qr_O.png
-├── requirements.txt
 ├── README.md
-└── venv/
+└── requirements.txt
 ```
+
+## Documentação
+
+- [TDD técnico do projeto](docs/TDD.md)
+- [Instruções para agentes e colaboradores](AGENTS.md)
 
 ## Instalação
 
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/jogo-da-velha-ar.git
+git clone https://github.com/GabrielBarbosa0/Jogo-Da-Velha-AR.git
 ```
 
 ### 2. Entrar na pasta do projeto
 
 ```bash
-cd jogo-da-velha-ar
+cd Jogo-Da-Velha-AR
 ```
 
 ### 3. Criar ambiente virtual
@@ -127,6 +134,8 @@ python gerar_qrcodes.py
 python jogo_da_velha_ar.py
 ```
 
+Ao iniciar, o programa lista as câmeras disponíveis. Digite o número da câmera desejada para começar.
+
 ## Funcionamento Técnico
 
 O programa utiliza uma classe `CameraThread` para capturar frames em segundo plano. A thread principal usa o frame mais recente para executar:
@@ -134,7 +143,7 @@ O programa utiliza uma classe `CameraThread` para capturar frames em segundo pla
 - detecção de QR Codes com `QRCodeDetector.detectAndDecodeMulti`;
 - calibração da área virtual do tabuleiro;
 - conversão da posição do QR Code para linha/coluna da matriz 3x3;
-- confirmação da jogada após 3 segundos de estabilidade;
+- confirmação da jogada após 2 segundos de estabilidade;
 - renderização do tabuleiro e das peças salvas;
 - verificação de vitória ou empate.
 
@@ -177,8 +186,8 @@ Este projeto aplica diretamente conceitos de:
 
 - Computação Gráfica
 - Renderização
-- Transformações Geométricas
-- Processamento de Imagem
+- Transformações geométricas
+- Processamento de imagem
 - Realidade Aumentada
 - Visão Computacional
 - Paralelismo básico com multithread
