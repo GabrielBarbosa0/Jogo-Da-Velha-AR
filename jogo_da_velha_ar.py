@@ -4,6 +4,8 @@ import time
 import cv2
 import numpy as np
 
+from interface_grafica import selecionar_camera_grafica
+
 
 BRANCO = (255, 255, 255)
 VERDE = (0, 220, 80)
@@ -143,10 +145,11 @@ class EstadoJogo:
         return min((agora - self.candidato_inicio) / TEMPO_CONFIRMACAO, 1.0)
 
 
-def listar_cameras(max_cameras=10):
+def listar_cameras(max_cameras=10, exibir_log=True):
     cameras_disponiveis = []
 
-    print("Procurando cameras disponiveis...")
+    if exibir_log:
+        print("Procurando cameras disponiveis...")
 
     for i in range(max_cameras):
         cap = cv2.VideoCapture(i)
@@ -156,7 +159,8 @@ def listar_cameras(max_cameras=10):
 
             if ret:
                 cameras_disponiveis.append(i)
-                print(f"[{i}] Camera disponivel")
+                if exibir_log:
+                    print(f"[{i}] Camera disponivel")
 
         cap.release()
 
@@ -386,7 +390,7 @@ def desenhar_hud(frame, estado, tempo):
     elif estado.empate:
         linhas = ["Empate!", "R reinicia | F tela cheia | ESC sai"]
     else:
-        linhas = [f"Turno: {estado.jogador_atual}", "Segure o QR na celula por 3s."]
+        linhas = [f"Turno: {estado.jogador_atual}", "Segure o QR na celula por 2s."]
 
         if estado.candidato is not None:
             simbolo, linha, coluna = estado.candidato
@@ -470,7 +474,13 @@ def main():
     detector = cv2.QRCodeDetector()
     estado = EstadoJogo()
 
-    camera_id = selecionar_camera()
+    camera_id = selecionar_camera_grafica(
+        lambda: listar_cameras(exibir_log=False)
+    )
+
+    if camera_id is None:
+        return
+
     camera = CameraThread(camera_id)
 
     if not camera.is_opened():
@@ -482,7 +492,7 @@ def main():
     tela_cheia = False
 
     print("\nCamera iniciada em thread separada.")
-    print("Fluxo novo: calibre TABULEIRO e registre X/O um por vez por 3 segundos.")
+    print("Fluxo novo: calibre TABULEIRO e registre X/O um por vez por 2 segundos.")
     print("Pressione F para tela cheia, R para reiniciar ou ESC para sair.")
 
     while True:

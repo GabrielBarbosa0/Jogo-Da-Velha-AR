@@ -16,6 +16,8 @@
 
 Desenvolver uma aplicacao em Python capaz de:
 
+- apresentar uma interface grafica inicial em tela cheia;
+- permitir a selecao visual da camera antes da partida;
 - capturar video da camera em tempo real;
 - detectar QR Codes usados como marcadores fiduciais;
 - calibrar uma area virtual de tabuleiro;
@@ -59,20 +61,46 @@ Na versao atual, `TEMPO_CONFIRMACAO = 2.0`.
 
 ```mermaid
 flowchart LR
-    A["Camera/Webcam"] --> B["CameraThread"]
-    B --> C["Frame mais recente"]
-    C --> D["QRCodeDetector.detectAndDecodeMulti"]
-    D --> E["Processamento de marcadores"]
-    E --> F["EstadoJogo"]
-    F --> G["Renderizacao AR"]
-    G --> H["Janela OpenCV"]
+    A["InterfaceInicial"] --> B["Selecao da camera"]
+    B --> C["Camera/Webcam"]
+    C --> D["CameraThread"]
+    D --> E["Frame mais recente"]
+    E --> F["QRCodeDetector.detectAndDecodeMulti"]
+    F --> G["Processamento de marcadores"]
+    G --> H["EstadoJogo"]
+    H --> I["Renderizacao AR"]
+    I --> J["Janela OpenCV"]
 
-    F --> I["Matriz 3x3"]
-    F --> J["Turno atual"]
-    F --> K["Vitoria/empate"]
+    H --> K["Matriz 3x3"]
+    H --> L["Turno atual"]
+    H --> M["Vitoria/empate"]
 ```
 
 ## Componentes
+
+### `InterfaceInicial`
+
+Responsavel pelo fluxo anterior a captura da camera.
+
+Funcoes:
+
+- abrir uma tela inicial em modo tela cheia;
+- apresentar o botao `Jogar`;
+- procurar cameras em uma thread de apoio para nao congelar a interface;
+- permitir que o usuario escolha um dispositivo;
+- fechar o menu e devolver o identificador da camera para o jogo.
+
+O componente esta implementado em:
+
+```text
+interface_grafica.py
+```
+
+Tecnologia utilizada:
+
+```text
+tkinter
+```
 
 ### `CameraThread`
 
@@ -167,12 +195,17 @@ Isso significa que o sistema detectou um QR Code `X` na primeira linha e terceir
 ```mermaid
 sequenceDiagram
     participant U as Usuario
+    participant I as InterfaceInicial
     participant C as CameraThread
     participant M as Main Loop
     participant D as QRCodeDetector
     participant E as EstadoJogo
     participant R as Renderizacao
 
+    U->>I: Pressiona Jogar
+    I->>I: Procura e lista cameras
+    U->>I: Seleciona camera
+    I->>C: Inicia dispositivo escolhido
     U->>C: Mostra TABULEIRO ou peca
     C->>M: Entrega frame mais recente
     M->>D: Detecta QR Codes
@@ -270,9 +303,29 @@ Empate ocorre quando:
 
 ## Interface e Controles
 
+### Interface inicial
+
+A aplicacao inicia com uma interface `tkinter` em tela cheia.
+
+Fluxo:
+
+1. Exibir identidade visual do jogo e botao `Jogar`.
+2. Ao clicar, mostrar a tela de selecao de camera.
+3. Procurar dispositivos em segundo plano.
+4. Habilitar `Iniciar jogo` quando existir uma camera valida.
+5. Encerrar o menu e iniciar a captura com o dispositivo escolhido.
+
+Controles:
+
+- `Jogar`: avanca para a selecao de camera;
+- `Atualizar`: repete a busca por dispositivos;
+- `Iniciar jogo`: confirma a camera;
+- `F11`: alterna tela cheia;
+- `ESC`: sai da tela cheia ou fecha a interface.
+
 ### Janela
 
-A janela e criada em modo redimensionavel:
+A janela OpenCV da partida e criada em modo redimensionavel:
 
 ```python
 cv2.WINDOW_NORMAL
@@ -328,7 +381,10 @@ Observacao: o Python possui limitacoes de paralelismo por causa do GIL, mas a ca
 
 | Caso | Procedimento | Resultado esperado |
 |---|---|---|
-| Inicializacao | Executar `python jogo_da_velha_ar.py` | Sistema lista cameras e abre janela |
+| Inicializacao | Executar `python jogo_da_velha_ar.py` | Interface inicial abre em tela cheia |
+| Botao Jogar | Pressionar `Jogar` | Tela de selecao de camera aparece |
+| Busca de cameras | Aguardar a busca | Dispositivos disponiveis aparecem na lista |
+| Inicio da captura | Selecionar camera e pressionar `Iniciar jogo` | Interface fecha e janela OpenCV abre |
 | Calibracao | Mostrar QR `TABULEIRO` | Grade 3x3 aparece sobre a camera |
 | Registro de X | Posicionar QR `X` em uma celula vazia por 2s | Peca X e salva na celula |
 | Registro de O | Posicionar QR `O` em uma celula vazia por 2s | Peca O e salva na celula |
@@ -375,6 +431,9 @@ Criar testes unitarios para:
 
 O projeto sera considerado funcional quando:
 
+- a interface inicial abrir em tela cheia;
+- o botao `Jogar` abrir a selecao de camera;
+- o usuario conseguir selecionar o dispositivo antes da captura;
 - a camera abrir corretamente;
 - o tabuleiro for calibrado com o QR `TABULEIRO`;
 - uma jogada `X` ou `O` for confirmada apos 2 segundos;

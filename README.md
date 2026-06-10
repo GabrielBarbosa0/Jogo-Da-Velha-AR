@@ -4,6 +4,8 @@ Projeto de Computação Gráfica utilizando **Realidade Aumentada (AR)** e **Vis
 
 O sistema utiliza QR Codes como marcadores fiduciais para detectar elementos físicos pela câmera e projetar objetos gráficos virtuais diretamente sobre o ambiente real em tempo real.
 
+Ao executar o projeto, uma interface gráfica em tela cheia apresenta o botão **Jogar**. Depois dele, o usuário escolhe a câmera que será utilizada antes de iniciar a captura e a partida.
+
 ## Vídeo Demonstrativo
 
 [![Demonstração do projeto Jogo da Velha AR](https://img.youtube.com/vi/0WJbqrRqtr0/hqdefault.jpg)](https://youtu.be/0WJbqrRqtr0)
@@ -38,6 +40,16 @@ O projeto deixou de depender de todos os QR Codes visíveis ao mesmo tempo. O fl
 Essa lógica reduz o problema de piscada/falha de detecção, porque o sensor não precisa rastrear todos os marcadores da partida ao mesmo tempo.
 
 ## Controles
+
+### Interface inicial
+
+- `Jogar`: abre a seleção de câmera.
+- `Iniciar jogo`: confirma a câmera selecionada e inicia a captura.
+- `Atualizar`: procura novamente por dispositivos de câmera.
+- `F11`: alterna a interface inicial entre janela e tela cheia.
+- `ESC`: sai da tela cheia; quando já estiver em janela, fecha a interface.
+
+### Durante a partida
 
 - `ESC`: fecha o programa.
 - `R`: reinicia o tabuleiro e limpa as jogadas salvas.
@@ -75,6 +87,7 @@ Essa lógica reduz o problema de piscada/falha de detecção, porque o sensor n�
 ├── docs/
 │   └── TDD.md
 ├── gerar_qrcodes.py
+├── interface_grafica.py
 ├── jogo_da_velha_ar.py
 ├── qr_TABULEIRO.png
 ├── qr_X.png
@@ -134,12 +147,22 @@ python gerar_qrcodes.py
 python jogo_da_velha_ar.py
 ```
 
-Ao iniciar, o programa lista as câmeras disponíveis. Digite o número da câmera desejada para começar.
+Ao iniciar, o programa abre a interface gráfica para escolha da câmera.
+
+O fluxo de inicialização é:
+
+1. A interface abre em tela cheia.
+2. O usuário pressiona **Jogar**.
+3. O sistema procura as câmeras disponíveis.
+4. O usuário seleciona uma câmera.
+5. Ao pressionar **Iniciar jogo**, a interface fecha e a captura AR começa.
 
 ## Funcionamento Técnico
 
 O programa utiliza uma classe `CameraThread` para capturar frames em segundo plano. A thread principal usa o frame mais recente para executar:
 
+- abertura da interface gráfica com `tkinter`;
+- seleção visual da câmera antes da captura;
 - detecção de QR Codes com `QRCodeDetector.detectAndDecodeMulti`;
 - calibração da área virtual do tabuleiro;
 - conversão da posição do QR Code para linha/coluna da matriz 3x3;

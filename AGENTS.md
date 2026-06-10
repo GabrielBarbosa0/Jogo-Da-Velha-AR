@@ -10,6 +10,12 @@ O arquivo principal é:
 jogo_da_velha_ar.py
 ```
 
+A interface inicial está em:
+
+```text
+interface_grafica.py
+```
+
 O documento técnico do projeto fica em:
 
 ```text
@@ -87,6 +93,7 @@ python -m py_compile jogo_da_velha_ar.py
 
 Principais componentes:
 
+- `InterfaceInicial`: tela de abertura, botão Jogar e seleção de câmera.
 - `CameraThread`: captura frames em thread separada.
 - `EstadoJogo`: mantém matriz 3x3, turno, candidato, vitória e empate.
 - `processar_marcadores`: interpreta QR Codes detectados.
@@ -101,6 +108,7 @@ Principais componentes:
 - A câmera pode falhar por iluminação ruim, QR Code pequeno ou movimento brusco.
 - A confirmação de jogada depende de estabilidade temporal.
 - A tela cheia é controlada pela janela do OpenCV, não por interface web.
+- A interface inicial usa `tkinter` e deve selecionar a câmera antes de criar `CameraThread`.
 - O projeto ainda é um protótipo acadêmico; prefira mudanças simples, explicáveis e fáceis de demonstrar.
 
 ## Documentação
